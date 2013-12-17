@@ -192,8 +192,8 @@ Description: ssh connection string in the format `SSH_USER@SSH_HOST`. The task a
 
 #### backup_to
 Type: `String`
-Default: `"db/backups/<%= grunt.template.today('yyyy-mm-dd') %> - <%= target %>.sql"`
-Description: full destination file path of the generated dump. This option can include templates such as `<%= grunt.template.today('yyyy-mm-dd') %>` or `<%= target %>`.
+Default: `"db/backups/<%= grunt.template.today('yyyy-mm-dd') %> - <%= grunt.task.current.target %>.sql"`
+Description: full destination file path of the generated dump. This option can include templates such as `<%= grunt.template.today('yyyy-mm-dd') %>` or `<%= grunt.task.current.target %>`.
 
 ### Options
 
