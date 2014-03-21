@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:digitalcuisine/grunt-mysql-dump.git"
+    "url": "git@github.com:UseAllFive/grunt-mysql-dump.git"
   },
   "bugs": {
     "url": "https://github.com/digitalcuisine/grunt-mysql-dump/issues"
