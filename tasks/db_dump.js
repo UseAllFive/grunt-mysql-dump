@@ -9,7 +9,8 @@
 'use strict';
 
 var shell = require('shelljs'),
-	path  = require('path');
+    path  = require('path'),
+    _     = require('lodash');
 
 
 /**
