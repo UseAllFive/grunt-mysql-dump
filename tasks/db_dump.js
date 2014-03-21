@@ -8,7 +8,8 @@
 
 'use strict';
 
-var shell = require('shelljs'),
+var chalk = require('chalk'),
+    shell = require('shelljs'),
     path  = require('path'),
     _     = require('lodash');
 
@@ -20,6 +21,7 @@ var shell = require('shelljs'),
  */
 var commandTemplates = {
     mysqldump: "mysqldump -h <%= host %> -P <%= port %> -u<%= user %> <%= pass %> --databases <%= database %>",
+    mysql: "mysql -h <%= host %> -P <%= port %> -u<%= user %> <%= pass %> < \"<%= backup_to %>\"",
     ssh: "ssh <%= host %>"
 };
 
@@ -46,6 +48,30 @@ module.exports = function(grunt) {
         else
         {
             grunt.log.fail("Database dump failed!");
+            return false;
+        }
+    });
+
+    /** db_import
+     */
+    grunt.registerMultiTask('db_import', 'Import database', function() {
+        // Get tasks options + set default port
+        var options = this.options({
+            pass: "",
+            port: 3306,
+            backup_to: "db/backups/<%= grunt.template.today('yyyy-mm-dd') %> - <%= target %>.sql"
+        });
+
+        var paths = generate_backup_paths(this.target, options);
+
+        grunt.log.subhead("Importing database '" + options.title + "' from '" + paths.file + "'");
+        if(db_import(options, paths))
+        {
+            grunt.log.success("Database dump succesfully imported");
+        }
+        else
+        {
+            grunt.log.fail("Database import failed!");
             return false;
         }
     });
@@ -140,6 +166,68 @@ module.exports = function(grunt) {
         //-- Write command if being verbose
         grunt.verbose.writeln("Command: " + chalk.cyan(cmd));
 
+        // Capture output...
+        var ret = shell.exec(cmd, {silent: true});
+
+        if(ret.code != 0)
+        {
+            grunt.log.error(ret.output)
+            return false;
+        }
+
+        // Write output to file using native Grunt methods
+        grunt.file.write(paths.file, ret.output);
+
+        return true;
+    }
+
+    /**
+     * Import a MYSQL database from a file
+     *
+     * @author: Justin Anastos <janastos@useallfive.com>
+     */
+    function db_import(options, paths) {
+        var cmd;
+
+        grunt.file.mkdir(paths.dir);
+
+
+        // 2) Compile MYSQL cmd via Lo-Dash template string
+        //
+        // "Process" the password flag directly in the data hash to avoid a "-p" that would trigger a password prompt
+        // in the shell
+        var tpl_mysql = grunt.template.process(commandTemplates.mysql, {
+            data: {
+                user: options.user,
+                pass: options.pass !== "" ? '-p' + options.pass : '',
+                host: options.host,
+                port: options.port,
+                backup_to: options.backup_to
+            }
+        });
+
+        // 3) Test whether we should connect via SSH first
+        if (typeof options.ssh_host === "undefined")
+        {
+            // it's a local/direct connection
+            cmd = tpl_mysql;
+
+        }
+        else
+        {
+            // it's a remote connection
+            var tpl_ssh = grunt.template.process(commandTemplates.ssh, {
+                data: {
+                    host: options.ssh_host
+                }
+            });
+
+            cmd = tpl_ssh + " \\ " + tpl_mysql;
+        }
+
+        //-- Write command if being verbose
+        grunt.verbose.writeln("Command: " + chalk.cyan(cmd));
+        return true;
         // Capture output...
         var ret = shell.exec(cmd, {silent: true});
 
