@@ -89,13 +89,16 @@ module.exports = function(grunt) {
     _.each(additional_options_keys, function(key) {
       var value;
       value = options[key];
+      if (key === "socket") {
+        key = "--socket";
+      }
       if (value === "") {
         return additional_properties.push(key);
       } else {
         return additional_properties.push(key + " \"" + value + "\"");
       }
     });
-    if (additional_properties.length === 0) {
+    if (additional_properties.length !== 0) {
       command += " " + additional_properties.join(" ");
     }
     return command;
@@ -165,6 +168,7 @@ module.exports = function(grunt) {
       });
       cmd = tpl_ssh + " \\ " + tpl_mysql;
     }
+    cmd = add_untemplated_properties_to_command(cmd, options);
     grunt.verbose.writeln("Command: " + chalk.cyan(cmd));
     ret = shell.exec(cmd, {
       silent: true

@@ -85,11 +85,13 @@ module.exports = (grunt) ->
         additional_options_keys = _.reject _.keys(options), (option) ->
             _.contains(default_option_keys, option)
 
-
         #-- For each additional option key, add it's key + value to the
         #   additional_properties object array
         _.each additional_options_keys, (key) ->
             value = options[key]
+
+            #-- Modify socket parameter to be --socket
+            key = "--socket" if key is "socket"
 
             if value is ""
                 additional_properties.push key
@@ -97,7 +99,7 @@ module.exports = (grunt) ->
                 additional_properties.push key + " \"" + value + "\""
 
         #-- Add the properties to the command
-        if additional_properties.length is 0
+        if additional_properties.length isnt 0
             command += " " + additional_properties.join " "
 
         command
@@ -171,6 +173,8 @@ module.exports = (grunt) ->
                     host: options.ssh_host
 
             cmd = tpl_ssh + " \\ " + tpl_mysql
+
+        cmd = add_untemplated_properties_to_command cmd, options
 
         #-- Write command if being verbose
         grunt.verbose.writeln "Command: " + chalk.cyan(cmd)
