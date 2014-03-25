@@ -12,14 +12,6 @@ module.exports = (grunt) ->
     grunt.initConfig
         db_fixture: grunt.file.readJSON('test/fixtures/test_db.json')
 
-        jshint:
-            all: [
-                'tasks/*.js'
-                '<%= nodeunit.tests %>'
-            ]
-            options:
-                jshintrc: '.jshintrc'
-
         # Before generating any new files, remove any previously-created files.
         clean:
             tests: ['tmp']
@@ -29,6 +21,14 @@ module.exports = (grunt) ->
                 mysql: '<%= db_fixture.mysql %>',
             # This one should fail
                 info_schema: '<%= db_fixture.info_schema %>'
+
+        jshint:
+            all: [
+                'tasks/*.js'
+                '<%= nodeunit.tests %>'
+            ]
+            options:
+                jshintrc: '.jshintrc'
 
         # Unit tests.
         nodeunit:
