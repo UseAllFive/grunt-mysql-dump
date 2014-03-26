@@ -186,7 +186,4 @@ module.exports = (grunt) ->
             grunt.log.error ret.output
             return false
 
-        # Write output to file using native Grunt methods
-        grunt.file.write paths.file, ret.output
-
         true

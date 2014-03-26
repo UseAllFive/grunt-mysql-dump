@@ -177,7 +177,6 @@ module.exports = function(grunt) {
       grunt.log.error(ret.output);
       return false;
     }
-    grunt.file.write(paths.file, ret.output);
     return true;
   };
 };
